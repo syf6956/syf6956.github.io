@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨提醒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .welcome-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #e91e63;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: 3px solid #ff69b4;
+        }
+        
+        .welcome-message h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .welcome-message p {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .countdown {
+            font-size: 24px;
+            color: #e91e63;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .tip-window {
+            position: fixed;
+            width: 200px;  /* 缩小窗口宽度 */
+            min-height: 50px;  /* 缩小窗口高度 */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-size: 16px;  /* 保持字体大小不变 */
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 8px;
+            word-wrap: break-word;
+            border: 2px solid rgba(255,255,255,0.3);
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-message">
+        <h1>💖 静静小公主 💖</h1>
+        <p>你的骑士为你祈祷</p>
+        <div class="countdown" id="countdown">3</div>
+    </div>
+
+    <div id="tipsContainer"></div>
+
+    <script>
+        // 温馨提醒内容
+        const tips = [
+            '多喝水哦~', '保持微笑呀', '每天都要元气满满',
+            '记得吃水果', '保持好心情', '好好爱自己', '我想你了',
+            '梦想成真', '期待下一次见面', '金榜题名',
+            '顺顺利利', '早点休息', '愿所有烦恼都消失',
+            '别熬夜', '今天过得开心嘛', '天冷了，多穿衣服',
+            '记得按时吃饭', '保持乐观心态', '你是最棒的',
+            '一切都会好起来的', '注意休息', '加油！'
+        ];
+
+        // 背景颜色（与Python版本保持一致）
+        const bgColors = [
+            'lightpink', 'skyblue', 'lightgreen', 'lavender',
+            'lightyellow', 'plum', 'coral', 'bisque', 'aquamarine',
+            'mistyrose', 'honeydew', 'lavenderblush', 'oldlace'
+        ];
+
+        let popupInterval;
+        let createdPopups = 0;
+        const totalPopups = 300; // 弹窗数量增加到300个
+
+        // 倒计时函数
+        function startCountdown() {
+            let countdown = 3;
+            const countdownElement = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    // 隐藏欢迎信息
+                    document.querySelector('.welcome-message').style.display = 'none';
+                    // 开始弹窗
+                    startPopups();
+                }
+            }, 1000);
+        }
+
+        // 创建单个弹窗
+        function createTip() {
+            const tip = tips[Math.floor(Math.random() * tips.length)];
+            const color = bgColors[Math.floor(Math.random() * bgColors.length)];
+            
+            const tipElement = document.createElement('div');
+            tipElement.className = 'tip-window';
+            tipElement.textContent = tip;
+            tipElement.style.background = color;
+            
+            // 随机位置（铺满整个屏幕）
+            const maxX = window.innerWidth - 220; // 考虑缩小后的窗口宽度
+            const maxY = window.innerHeight - 70; // 考虑缩小后的窗口高度
+            const x = Math.max(10, Math.random() * maxX);
+            const y = Math.max(10, Math.random() * maxY);
+            
+            tipElement.style.left = x + 'px';
+            tipElement.style.top = y + 'px';
+            
+            // 随机旋转角度（-3度到3度）
+            const rotation = (Math.random() * 6) - 3;
+            tipElement.style.transform = `rotate(${rotation}deg)`;
+            
+            document.getElementById('tipsContainer').appendChild(tipElement);
+            createdPopups++;
+            
+            // 3-6秒后自动消失
+            const duration = 3000 + Math.random() * 3000;
+            setTimeout(() => {
+                if (tipElement.parentNode) {
+                    tipElement.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (tipElement.parentNode) {
+                            tipElement.remove();
+                        }
+                    }, 500);
+                }
+            }, duration);
+        }
+
+        // 开始弹窗
+        function startPopups() {
+            const speed = 20; // 加快弹窗速度，从50ms改为20ms
+            
+            let popupsCreated = 0;
+            
+            popupInterval = setInterval(() => {
+                createTip();
+                popupsCreated++;
+                
+                if (popupsCreated >= totalPopups) {
+                    clearInterval(popupInterval);
+                    // 所有弹窗创建完成后，可以添加其他效果
+                    setTimeout(() => {
+                        // 可以在这里添加结束后的特殊效果
+                    }, 1000);
+                }
+            }, speed);
+        }
+
+        // 页面加载完成后开始倒计时
+        window.addEventListener('load', startCountdown);
+
+        // 触摸设备优化
+        document.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // 阻止页面滚动
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
